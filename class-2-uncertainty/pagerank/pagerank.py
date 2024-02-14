@@ -57,7 +57,21 @@ def transition_model(corpus, page, damping_factor):
     linked to by `page`. With probability `1 - damping_factor`, choose
     a link at random chosen from all pages in the corpus.
     """
-    raise NotImplementedError
+    len_corpus = len(corpus)
+    dist = {}
+    for unit in corpus:
+        dist[unit] = 0
+    if len(corpus[page]) == 0:
+        for unit in dist:
+            dist[unit] = 1/len_corpus
+
+    else:
+        for unit in corpus[page]:
+            dist[unit] = damping_factor/len(corpus[page])
+        for unit in dist:
+            dist[unit] += (1-damping_factor)/len_corpus
+
+    return dist
 
 
 def sample_pagerank(corpus, damping_factor, n):
@@ -69,7 +83,20 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+
+    dist = {}
+    for unit in corpus:
+        dist[unit] = 0
+
+    for i in range(n):
+        if i == 0:
+            page = random.choice(list(corpus))
+        else:
+            dist = transition_model(corpus, page, damping_factor)
+            page = random.choices(list(dist), weights=list(dist.values()))[0]
+        dist[page] += 1/n
+
+    return dist
 
 
 def iterate_pagerank(corpus, damping_factor):
@@ -81,7 +108,23 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    dist = {}
+    for unit in corpus:
+        dist[unit] = 1/len(corpus)
+    
+    while True:
+        new_dist = {}
+        for unit in corpus:
+            new_dist[unit] = (1-damping_factor)/len(corpus)
+            for page in corpus:
+                if unit in corpus[page]:
+                    new_dist[unit] += damping_factor*dist[page]/len(corpus[page])
+        if all(abs(new_dist[unit] - dist[unit]) < 0.001 for unit in corpus):
+            break
+        dist = new_dist
+    return dist
+
+
 
 
 if __name__ == "__main__":
