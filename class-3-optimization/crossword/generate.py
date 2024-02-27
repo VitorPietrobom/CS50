@@ -196,8 +196,9 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        return self.domains[var]
-        raise NotImplementedError
+        values = self.domains[var]
+        neighbors = self.crossword.neighbors(var)
+        return sorted(values, key=lambda value: sum(1 for neighbor in neighbors if value in self.domains[neighbor]))
 
     def select_unassigned_variable(self, assignment):
         """
@@ -230,7 +231,6 @@ class CrosswordCreator():
                 if result is not None:
                     return result
         return None
-        raise NotImplementedError
 
 
 def main():
